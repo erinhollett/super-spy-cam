@@ -61,13 +61,16 @@ while(True):
             if result < 0.35:       # Motion has stopped
                 print("motion stopped. Stopping the video")
                 video_object.release()      # Save the video
-                send_video_to_discord(save_path, DISCORD_TOKEN, CHANNEL_ID, video_data)        # Discord Bot uploads video
+                # Converting to MP4:
+                mp4_path = save_path.replace(".avi", ".mp4")
+                os.system(f"ffmpeg -i \"{save_path}\" -c:v libx264 -crf 23 -preset medium -pix_fmt yuv420p -movflags +faststart \"{mp4_path}\"")
+                send_video_to_discord(mp4_path, DISCORD_TOKEN, CHANNEL_ID, video_data)        # Discord Bot uploads video
                 # Reset the tracking variables:
                 video_object = None
                 motion_started = False
                 frame_rec_count = 0
             else:       # Motion is still ongoing
-                ("there is still motion. resetting the frame count")
+                print("there is still motion. resetting the frame count")
                 frame_rec_count = 0     # Reset the counter (continuing the 15 sec loop)
 
 # === Ending the program if the webcam fails ===
