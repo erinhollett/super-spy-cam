@@ -12,9 +12,6 @@ class MyHandler(BaseHTTPRequestHandler):
       self.send_header("Content-type", "text/html")
       self.end_headers()
 
-      # listing the video files:
-      html_videos = ""
-
       # Convert the filename into a datatime object:
       for f in video_folder:
         if f.endswith(".mp4"):
@@ -23,64 +20,8 @@ class MyHandler(BaseHTTPRequestHandler):
           timestamp = dt.strftime("%B %d, %Y at %I:%M:%S %p")
           month = dt.strftime("%B")
 
-          # Creating the dynamic HTML to display the videos:
-          html_videos += f"""
-
-          <li>{month}
-              <ul>
-                  <li>
-                    <a href="/videos/{f}">{timestamp}</a>
-                    <video controls width="250">
-                      <source src="/videos/{f}" type="video/mp4" />
-                    </video>
-                  </li>
-              </ul>
-          </li>
-          """
-      # Creating the general HTML template for the static elements:
-      html_template = """
-      <!DOCTYPE html>
-      <html>
-      <head>
-          <title>Super Spy Cam</title>\n
-          <script type="text/javascript">
-
-          function makeVideoGoOnScreen(videoObject) {
-            
-            ///// START --- ERIN PUT ALL YOUR CODE BELOW THIS LINE AND ABOVE END
-
-            console.log('hello world tho');
-            console.log(videoObject);
-            
-            function willpringle(erin) {
-              console.log(erin == 'lovely');
-            }
-
-            console.log(willpringle("lovely"));
-
-
-
-            //// END
-          }
-
-
-          const myPromise = fetch("http://localhost:8000/video-list.json");
-          myPromise
-            .then(res => res.text())
-            .then(txt => makeVideoGoOnScreen(JSON.parse(txt)));
-
-          </script>
-      </head>
-      <body>
-          <h1>Super Spy Cam</h1>
-          <h2>Captured Videos:</h2>
-          <ul>""" + html_videos + """
-          </ul>
-      </body>
-      </html>
-      """
-
-      self.wfile.write(bytes(html_template, 'utf-8'))
+      with open("index.html", "rb") as f:
+        self.wfile.write(f.read())
 
     # If a user clicks on one of the files:
     elif self.path.startswith("/videos/"):
@@ -115,20 +56,22 @@ class MyHandler(BaseHTTPRequestHandler):
 
       json_response = json.dumps(video_data, indent=4)
       self.wfile.write(bytes(json_response, "utf-8"))
-    
-    '''elif self.path == "/wkp":
+
+    elif self.path == "/index.js":
       self.send_response(200)
-      self.send_header('Content-Type', 'text/html')
+      self.send_header('Content-type', 'text/javascript')
       self.end_headers()
 
-      # read the file from the hard drive,
-      fp = open('./index.html', 'r') # as a string
-      html_string = fp.read()
-      print(html_string)
-      self.wfile.write(bytes(html_string, 'utf-8'))
-  '''
+      with open("index.js", "rb") as f:
+        self.wfile.write(f.read())
 
+    elif self.path == "/favicon.ico":
+      self.send_response(200)
+      self.send_header('Content-type', 'image/x-icon')
+      self.end_headers()
 
+      with open('./camera_icon.ico', 'rb') as fp:
+        self.wfile.write(fp.read())
 
     # If the website doesn't load
     else:
